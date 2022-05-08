@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import ClassVar, Type, Optional
 
-from marshmallow import Schema, fields
+from marshmallow import Schema
 from marshmallow_dataclass import dataclass
 
 

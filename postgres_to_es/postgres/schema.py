@@ -5,13 +5,11 @@ from typing import ClassVar, Type
 from typing import Literal
 from typing import Optional
 
-from icecream import ic
 from marshmallow import Schema
 from marshmallow.base import FieldABC
 from marshmallow_dataclass import dataclass
 
 PRESCRIPTION = Literal["select", "delete"]
-ic("")
 
 
 @dataclass

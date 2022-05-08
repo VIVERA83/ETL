@@ -1,4 +1,5 @@
 import datetime
+import uuid
 from datetime import datetime
 from typing import Any, ClassVar, Type
 
@@ -8,7 +9,7 @@ from .model import Actor, Writer, Film, Genre, Person, Delete
 
 
 class BaseSchema(Schema):
-    id = fields.UUID()
+    id = fields.UUID(allow_none=True, default=uuid.uuid4().hex)
     Schema: ClassVar[Type[Schema]] = Schema
 
     class Meta:
@@ -22,23 +23,23 @@ class BaseSchema(Schema):
 
 class ActorSchema(BaseSchema):
     __model__ = Actor
-    name = fields.Str()
+    name = fields.Str(allow_none=True)
 
 
 class WriterSchema(BaseSchema):
     __model__ = Writer
-    name = fields.Str()
+    name = fields.Str(allow_none=True)
 
 
 class FilmSchema(BaseSchema):
     __model__ = Film
     imdb_rating = fields.Float(allow_none=True)
-    genre = fields.List(fields.Str())
+    genre = fields.List(fields.Str(allow_none=True))
     title = fields.Str()
     description = fields.Str()
-    director = fields.List(fields.Str())
-    actors_names = fields.List(fields.Str())
-    writers_names = fields.List(fields.Str())
+    director = fields.List(fields.Str(allow_none=True))
+    actors_names = fields.List(fields.Str(allow_none=True))
+    writers_names = fields.List(fields.Str(allow_none=True))
     actors = fields.List(fields.Nested(ActorSchema))
     writers = fields.List(fields.Nested(WriterSchema))
 

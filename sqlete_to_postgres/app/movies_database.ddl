@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS content.genre_film_work (
 CREATE INDEX IF NOT EXISTS film_work_creation_date_idx ON content.film_work(creation_date);
 CREATE UNIQUE INDEX IF NOT EXISTS film_work_person_idx ON content.person_film_work (id,film_work_id, person_id);
 
+-- создается таблица в которою будут сбрасываться данные об уделенных записей из таблиц
 create table if not exists content.del_item(
     id uuid not null default gen_random_uuid(),
     table_name text not null,
@@ -52,12 +53,35 @@ create table if not exists content.del_item(
     created timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
 
-create OR replace function trigger_before_del () returns trigger as '
+--create OR replace function trigger_before_del () returns trigger as '
+--begin
+--	insert into del_item (table_name, field_id) values (TG_RELNAME, old.id);
+--	return old;
+--end;
+--'
+--LANGUAGE plpgsql;
+
+create OR replace function trigger_before_del () returns trigger as
+$$
 begin
 	insert into del_item (table_name, field_id) values (TG_RELNAME, old.id);
+	case TG_RELNAME
+		when 'genre' then
+			update "content".film_work  as fw set modified = default
+			from "content".genre_film_work as gfw , "content".genre as g
+			where gfw.genre_id = g.id  and gfw.film_work_id =fw.id and g."name" = old."name";
+		when 'person' then
+			update "content".film_work  as fw set modified = default
+			from "content".person_film_work as pfw , "content".person as p
+			where pfw.person_id = p.id  and pfw.film_work_id =fw.id and p.full_name  = old.full_name;
+		else
+			select table_name
+			from information_schema.columns
+			where table_schema='public';
+	end case;
 	return old;
 end;
-'
+$$
 LANGUAGE plpgsql;
 
 -- Создаем триггеры на удаление записей, если записи удаляются из основных таблиц

@@ -1,6 +1,6 @@
 import datetime
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -51,4 +51,3 @@ class Delete:
     field_id: uuid
     table_name: str
     created: datetime.datetime
-

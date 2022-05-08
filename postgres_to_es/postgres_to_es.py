@@ -25,12 +25,14 @@ def load_from_postgres_to_elastic(state: State,
                                   pg: PostgresExtractor,
                                   sql_requests: list[SqlRequestSchema],
                                   schema: list[dataclass]):
+
     for sql_request, schema in zip(sql_requests, schema, ):
         state_data: StateSchema = StateSchema.Schema().load({"index": state.get_state("index")})
         index = state_data.index.get(sql_request.index)
         sql_request.modified = index.modified if index else None
         sql_request.offset = index.offset if index else 0
         # ic(sql_request.index)
+        ic(datetime.utcnow(), datetime.now())
         flag = False
         for chang in pg.execute(sql_request):
 
@@ -41,10 +43,8 @@ def load_from_postgres_to_elastic(state: State,
                 match sql_request.prescription:
                     case "select":
                         es.insert_many(sql_request.index, schema().dump(objs, many=True))
-                        ic(objs)
                         logging.info(
                             f" load_from_postgres_to_elastic: Создано {len(objs)} записей в {sql_request.index.upper()}")
-
                     case "delete":
                         obj = None
                         count = 0
@@ -61,11 +61,12 @@ def load_from_postgres_to_elastic(state: State,
 
         if flag:
             sql_request.offset = 0
-            sql_request.modified = datetime(year=datetime.now().year,
-                                            month=datetime.now().month,
-                                            day=datetime.now().day,
-                                            hour=datetime.now().hour,
-                                            minute=datetime.now().minute,
-                                            microsecond=datetime.now().microsecond).utcnow()
+            sql_request.modified = datetime.utcnow()
+                # datetime(year=datetime.utcnow().year,
+                #                             month=datetime.utcnow().month,
+                #                             day=datetime.utcnow().day,
+                #                             hour=datetime.utcnow().hour,
+                #                             minute=datetime.utcnow().minute,
+                #                             microsecond=datetime.utcnow().microsecond).utcnow()
             state_data.update({sql_request.index: sql_request.Schema(only={"modified", "offset"}).dump(sql_request)})
             state.set_state("index", state_data.Schema().dump(state_data).get("index"))
