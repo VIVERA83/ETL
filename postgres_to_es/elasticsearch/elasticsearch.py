@@ -13,6 +13,7 @@ class BaseElasticsearch:
     __REFRESH = "_refresh"
     __BULK = "_bulk"
     __CAT = "_cat"
+    __COUNT = "_count"
 
     def __init__(
             self,
@@ -100,3 +101,9 @@ class BaseElasticsearch:
     def _refresh(self, index: str) -> dict:
         url = self._create_url(index, self.__REFRESH)
         return requests.get(url).json()
+
+    def get_count_documents(self, index) -> int or None:
+        url = self._create_url(index, uri=self.__COUNT)
+        result: dict = requests.get(url, headers=self.__HEADERS).json()
+        return result.get("count")
+

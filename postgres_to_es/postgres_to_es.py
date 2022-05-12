@@ -32,7 +32,7 @@ def load_from_postgres_to_elastic(state: State,
         sql_request.modified = index.modified if index else None
         sql_request.offset = index.offset if index else 0
         # ic(sql_request.index)
-        ic(datetime.utcnow(), datetime.now())
+        # ic(datetime.utcnow(), datetime.now())
         flag = False
         for chang in pg.execute(sql_request):
 
