@@ -25,14 +25,11 @@ def load_from_postgres_to_elastic(state: State,
                                   pg: PostgresExtractor,
                                   sql_requests: list[SqlRequestSchema],
                                   schema: list[dataclass]):
-
     for sql_request, schema in zip(sql_requests, schema, ):
         state_data: StateSchema = StateSchema.Schema().load({"index": state.get_state("index")})
         index = state_data.index.get(sql_request.index)
         sql_request.modified = index.modified if index else None
         sql_request.offset = index.offset if index else 0
-        # ic(sql_request.index)
-        # ic(datetime.utcnow(), datetime.now())
         flag = False
         for chang in pg.execute(sql_request):
 
@@ -51,7 +48,7 @@ def load_from_postgres_to_elastic(state: State,
                         for count, obj in enumerate(objs):
                             ic(es.delete_document_by_id(obj.table_name, obj.field_id))
                             logging.info(f" Удалена запись из {obj.table_name.upper()}, id = {obj.field_id}")
-                        logging.info(f" Всего удалено записей из {obj.table_name.upper()}, {count+1}")
+                        logging.info(f" Всего удалено записей из {obj.table_name.upper()}, {count + 1}")
                     case _:
                         logging.info(f"load_from_postgres_to_elastic {index=}")
 
@@ -61,12 +58,6 @@ def load_from_postgres_to_elastic(state: State,
 
         if flag:
             sql_request.offset = 0
-            sql_request.modified = datetime.utcnow()
-                # datetime(year=datetime.utcnow().year,
-                #                             month=datetime.utcnow().month,
-                #                             day=datetime.utcnow().day,
-                #                             hour=datetime.utcnow().hour,
-                #                             minute=datetime.utcnow().minute,
-                #                             microsecond=datetime.utcnow().microsecond).utcnow()
+            sql_request.modified = datetime.now()
             state_data.update({sql_request.index: sql_request.Schema(only={"modified", "offset"}).dump(sql_request)})
             state.set_state("index", state_data.Schema().dump(state_data).get("index"))
