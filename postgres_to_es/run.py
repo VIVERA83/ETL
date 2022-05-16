@@ -19,6 +19,7 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     filename = "elasticsearch/movies_es_schema.json"
     index = "movies"
+
     with open(filename, "r", encoding="utf-8") as file:
         schema_movies: dict = json.loads(file.read())
     es = BaseElasticsearch(host=os.getenv("ELASTIC_HOST"))

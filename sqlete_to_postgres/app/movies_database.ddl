@@ -53,13 +53,6 @@ create table if not exists content.del_item(
     created timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
 
---create OR replace function trigger_before_del () returns trigger as '
---begin
---	insert into del_item (table_name, field_id) values (TG_RELNAME, old.id);
---	return old;
---end;
---'
---LANGUAGE plpgsql;
 
 create OR replace function trigger_before_del () returns trigger as
 $$
